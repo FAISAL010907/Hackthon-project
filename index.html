@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sarthi (सारथी) | Government Services Portal</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app-layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="brand-box">
+      <div class="brand-emblem">🏛️</div>
+      <h2 id="sidebarTitle">Sarthi</h2>
+      <p id="sidebarSubtitle">Government Services Portal</p>
+    </div>
+    <nav class="sidebar-nav">
+      <button class="nav-link active" id="nav-dashboard" onclick="navigate('dashboard')"><span>⌂</span><span data-i18n="navDashboard">Dashboard</span></button>
+      <button class="nav-link" id="nav-search" onclick="navigate('search')"><span>▤</span><span data-i18n="navSearch">Search Service</span></button>
+      <button class="nav-link" id="nav-documents" onclick="navigate('documents')"><span>▧</span><span data-i18n="navDocuments">My Documents</span></button>
+      <button class="nav-link" id="nav-track" onclick="navigate('track')"><span>▣</span><span data-i18n="navTrack">Track Application</span></button>
+      <button class="nav-link" id="nav-help" onclick="navigate('help')"><span>ⓘ</span><span data-i18n="navHelp">Help & Support</span></button>
+      <button class="nav-link" id="nav-logout" onclick="openLogoutModal()"><span>↪</span><span data-i18n="navLogout">Logout</span></button>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="badge-flag">🇮🇳 <strong>Digital India</strong><small>Citizen Service</small></div>
+    </div>
+  </aside>
+
+  <!-- MAIN WRAPPER -->
+  <div class="main-wrapper">
+    <div class="tricolor-bar"></div>
+    <header class="topbar">
+      <div class="topbar-row">
+        <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+        <div class="search-pill">
+          <span>⌕</span>
+          <input type="text" id="topbarSearch" placeholder="Search service..." oninput="syncSearch(this.value)">
+        </div>
+        <div class="topbar-right">
+          <div class="lang-pills">
+            <button class="lang-btn active" id="lang-en" onclick="setLanguage('en')">EN</button>
+            <button class="lang-btn" id="lang-hi" onclick="setLanguage('hi')">हिन्दी</button>
+            <button class="lang-btn" id="lang-mr" onclick="setLanguage('mr')">मराठी</button>
+          </div>
+          <div class="user-pill">
+            <span class="user-avatar">👤</span>
+            <span id="userNameDisplay">Citizen</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- PROGRESS STEPPER -->
+      <div class="stepper-wrap">
+        <div class="stepper" id="stepper">
+          <div class="step-node active" id="step-node-login"><span class="step-num">1</span><span class="step-label" data-i18n="stepLogin">Login</span></div><span class="step-arrow">›</span>
+          <div class="step-node" id="step-node-search"><span class="step-num">2</span><span class="step-label" data-i18n="stepSearch">Search</span></div><span class="step-arrow">›</span>
+          <div class="step-node" id="step-node-documents"><span class="step-num">3</span><span class="step-label" data-i18n="stepDocuments">Documents</span></div><span class="step-arrow">›</span>
+          <div class="step-node" id="step-node-autofill"><span class="step-num">4</span><span class="step-label" data-i18n="stepAutofill">Auto-fill</span></div><span class="step-arrow">›</span>
+          <div class="step-node" id="step-node-review"><span class="step-num">5</span><span class="step-label" data-i18n="stepReview">Review</span></div><span class="step-arrow">›</span>
+          <div class="step-node" id="step-node-track"><span class="step-num">6</span><span class="step-label" data-i18n="stepTrack">Track</span></div><span class="step-arrow">›</span>
+          <div class="step-node" id="step-node-certificate"><span class="step-num">7</span><span class="step-label" data-i18n="stepCertificate">Certificate</span></div>
+        </div>
+      </div>
+    </header>
+
+    <main class="page-content">
+      <!-- 1. LOGIN SCREEN -->
+      <section id="screen-login" class="screen-view active">
+        <div class="card login-card">
+          <div class="icon-circle">🏛️</div>
+          <h1 class="card-title text-center" id="loginTitle">Sarthi Citizen Login</h1>
+          <p class="card-desc text-center" data-i18n="loginDesc">Access government services with mobile and Aadhaar</p>
+          <form id="loginForm" onsubmit="handleSendOtp(event)">
+            <div class="form-group">
+              <label class="form-label" for="loginMobile"><span data-i18n="labelMobile">Mobile Number (10 digits)</span> *</label>
+              <input type="tel" id="loginMobile" class="form-control" maxlength="10" placeholder="e.g. 9876543210" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="loginAadhaar"><span data-i18n="labelAadhaar">Aadhaar Last 4 Digits</span> *</label>
+              <input type="text" id="loginAadhaar" class="form-control" maxlength="4" placeholder="e.g. 4321" required inputmode="numeric">
+              <small class="form-hint">Last 4 digits only (for identity verification)</small>
+            </div>
+            <button type="submit" id="btnSendOtp" class="btn btn-primary btn-block"><span data-i18n="btnSendOtp">Send OTP</span> →</button>
+          </form>
+
+          <div id="otpSection" class="otp-box" style="display:none;">
+            <div class="otp-notice">🔑 Demo OTP: <strong>123456</strong></div>
+            <div class="form-group">
+              <label class="form-label" for="loginOtp"><span data-i18n="labelEnterOtp">Enter 6-Digit OTP</span> *</label>
+              <input type="text" id="loginOtp" class="form-control text-center otp-input" maxlength="6" placeholder="123456" inputmode="numeric">
+            </div>
+            <button type="button" class="btn btn-primary btn-block" onclick="handleLoginSubmit()"><span data-i18n="btnLogin">Login to Sarthi</span> ✓</button>
+          </div>
+
+          <div class="demo-login-wrap">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="useDemoLogin()">⚡ <span data-i18n="btnDemoLogin">Use demo login (Savitri Deshmukh)</span></button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. SEARCH SCREEN -->
+      <section id="screen-search" class="screen-view">
+        <div class="hero-box">
+          <h1>Search a <span>Government Service</span></h1>
+          <p data-i18n="searchDesc">Find revenue, welfare, and civic certificates available under the Citizen Services Guarantee Act.</p>
+          <div class="search-bar-large">
+            <span>⌕</span>
+            <input type="text" id="serviceSearchInput" placeholder="Search a service (e.g. Income, Caste, Domicile...)" oninput="filterServices(this.value)">
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <h2 class="card-title">▦ <span data-i18n="catalogTitle">Available Services</span></h2>
+              <p class="card-desc" data-i18n="catalogDesc">Select Income Certificate to proceed with the full auto-fill workflow.</p>
+            </div>
+          </div>
+          <div class="services-grid" id="servicesGrid"></div>
+          <div id="noServices" class="text-center empty-state" style="display:none;">
+            <p><strong>No service found</strong></p>
+            <p class="muted">Try searching for "Income" to apply for the active certificate.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. DOCUMENTS SCREEN -->
+      <section id="screen-documents" class="screen-view">
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <h2 class="card-title">📜 <span data-i18n="docTitle">Income Certificate — Required Documents</span></h2>
+              <p class="card-desc" data-i18n="docDesc">Fill the 4 required verification documents. Sarthi will auto-fill your application once all 4 are added.</p>
+            </div>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="useSampleData()">✨ <span data-i18n="btnSample">Use sample data (Savitri Deshmukh, Nagpur)</span></button>
+          </div>
+
+          <div class="docs-list">
+            <!-- 1. Aadhaar -->
+            <div class="doc-card" id="doc-card-aadhaar">
+              <div class="doc-head">
+                <strong>🪪 1. Aadhaar Card (Identity Proof)</strong>
+                <span class="status-badge pending" id="badge-aadhaar">Pending</span>
+              </div>
+              <div class="form-grid">
+                <div class="form-group"><label class="form-label">Full Name *</label><input type="text" id="docName" class="form-control" oninput="validateDocs()"></div>
+                <div class="form-group"><label class="form-label">Date of Birth *</label><input type="date" id="docDob" class="form-control" onchange="validateDocs()"></div>
+                <div class="form-group"><label class="form-label">Gender *</label><select id="docGender" class="form-control" onchange="validateDocs()"><option value="">Select</option><option value="Female">Female</option><option value="Male">Male</option><option value="Transgender">Transgender</option></select></div>
+                <div class="form-group"><label class="form-label">Aadhaar Last 4 *</label><input type="text" id="docAadhaarLast4" class="form-control" maxlength="4" placeholder="4321" oninput="validateDocs()" inputmode="numeric"></div>
+              </div>
+            </div>
+
+            <!-- 2. Ration Card -->
+            <div class="doc-card" id="doc-card-ration">
+              <div class="doc-head">
+                <strong>🌾 2. Ration Card (Family Details)</strong>
+                <span class="status-badge pending" id="badge-ration">Pending</span>
+              </div>
+              <div class="form-grid">
+                <div class="form-group"><label class="form-label">Ration Card Number *</label><input type="text" id="docRationNo" class="form-control" placeholder="RC-MH-2024-89712" oninput="validateDocs()"></div>
+                <div class="form-group"><label class="form-label">Family Members Count *</label><input type="number" id="docMembers" class="form-control" min="1" max="25" placeholder="4" oninput="validateDocs()"></div>
+              </div>
+            </div>
+
+            <!-- 3. Address Proof -->
+            <div class="doc-card" id="doc-card-address">
+              <div class="doc-head">
+                <strong>🏠 3. Address Proof (Electricity Bill / Registry)</strong>
+                <span class="status-badge pending" id="badge-address">Pending</span>
+              </div>
+              <div class="form-grid">
+                <div class="form-group full-width"><label class="form-label">Residential Address *</label><input type="text" id="docAddress" class="form-control" placeholder="Plot 42, Anand Nagar, Wardha Road" oninput="validateDocs()"></div>
+                <div class="form-group"><label class="form-label">City / Village *</label><input type="text" id="docCity" class="form-control" placeholder="Nagpur" oninput="validateDocs()"></div>
+                <div class="form-group"><label class="form-label">District *</label><input type="text" id="docDistrict" class="form-control" value="Nagpur" oninput="validateDocs()"></div>
+                <div class="form-group"><label class="form-label">State *</label><input type="text" id="docState" class="form-control" value="Maharashtra" oninput="validateDocs()"></div>
+                <div class="form-group"><label class="form-label">PIN Code (6 digits) *</label><input type="text" id="docPin" class="form-control" maxlength="6" placeholder="440015" oninput="validateDocs()"></div>
+              </div>
+            </div>
+
+            <!-- 4. Income Declaration -->
+            <div class="doc-card" id="doc-card-income">
+              <div class="doc-head">
+                <strong>💰 4. Income Declaration (Self-Declaration)</strong>
+                <span class="status-badge pending" id="badge-income">Pending</span>
+              </div>
+              <div class="form-grid">
+                <div class="form-group"><label class="form-label">Occupation *</label><input type="text" id="docOccupation" class="form-control" placeholder="Agriculture & Small Dairy" oninput="validateDocs()"></div>
+                <div class="form-group"><label class="form-label">Annual Income in ₹ *</label><input type="number" id="docIncome" class="form-control" min="1" placeholder="85000" oninput="validateDocs()"></div>
+                <div class="form-group"><label class="form-label">Primary Income Source *</label><input type="text" id="docSource" class="form-control" placeholder="Farming & Milk Production" oninput="validateDocs()"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="actions-row">
+            <span id="docCountNotice" class="font-bold muted">4 documents required</span>
+            <button type="button" id="btnAutoFill" class="btn btn-primary" disabled onclick="startAutoFill()">⚡ <span data-i18n="btnAutoFill">Auto-fill my form</span> →</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. AUTO-FILL SCREEN -->
+      <section id="screen-autofill" class="screen-view">
+        <div class="anim-banner" id="animBanner">
+          <div class="anim-header">
+            <strong id="animTitle">⚡ Sarthi is filling your form from verified documents...</strong>
+            <div class="flex-center gap-10">
+              <button type="button" id="btnReplay" class="btn btn-secondary btn-xs" style="display:none;" onclick="replayAutoFill()">↺ Replay</button>
+              <span id="animPct" class="font-bold">0%</span>
+            </div>
+          </div>
+          <div class="progress-track"><div class="progress-bar" id="animBar"></div></div>
+        </div>
+
+        <div class="card official-paper">
+          <div class="official-header">
+            <h2>FORM 1-A: Application for Grant of Income Certificate</h2>
+            <p>Under Maharashtra Right to Public Services Act, 2015</p>
+          </div>
+
+          <form id="formAutoFilled" onsubmit="event.preventDefault();">
+            <div class="form-grid">
+              <div class="form-group"><label class="form-label">Applicant Name *</label><input type="text" id="fName" class="form-control" required></div>
+              <div class="form-group"><label class="form-label">Date of Birth *</label><input type="date" id="fDob" class="form-control" required></div>
+              <div class="form-group"><label class="form-label">Gender *</label><select id="fGender" class="form-control" required><option value="Female">Female</option><option value="Male">Male</option><option value="Transgender">Transgender</option></select></div>
+              <div class="form-group"><label class="form-label">Father / Husband Name *</label><input type="text" id="fRelation" class="form-control" placeholder="Ramesh Deshmukh" required oninput="validateReviewForm()"></div>
+              <div class="form-group full-width"><label class="form-label">Address *</label><input type="text" id="fAddress" class="form-control" required></div>
+              <div class="form-group"><label class="form-label">District *</label><input type="text" id="fDistrict" class="form-control" required></div>
+              <div class="form-group"><label class="form-label">State *</label><input type="text" id="fState" class="form-control" required></div>
+              <div class="form-group"><label class="form-label">PIN Code *</label><input type="text" id="fPin" class="form-control" maxlength="6" required></div>
+              <div class="form-group"><label class="form-label">Mobile Number *</label><input type="text" id="fMobile" class="form-control" maxlength="10" required></div>
+              <div class="form-group"><label class="form-label">Aadhaar (Masked) *</label><input type="text" id="fAadhaar" class="form-control font-mono" readonly></div>
+              <div class="form-group"><label class="form-label">Occupation *</label><input type="text" id="fOccupation" class="form-control" required></div>
+              <div class="form-group"><label class="form-label">Annual Family Income (₹) *</label><input type="number" id="fIncome" class="form-control" required></div>
+              <div class="form-group"><label class="form-label">Purpose of Certificate *</label><select id="fPurpose" class="form-control"><option value="Scholarship">Scholarship Application</option><option value="Loan">Bank Loan / Credit</option><option value="Job">Government / Employment</option><option value="Other">Other Official Purpose</option></select></div>
+            </div>
+
+            <div class="consent-box">
+              <input type="checkbox" id="consentCheck" onchange="validateReviewForm()">
+              <label for="consentCheck" data-i18n="consentText">I confirm these details are correct and I consent to submit this application for statutory income verification.</label>
+            </div>
+
+            <div class="actions-row mt-20">
+              <button type="button" class="btn btn-secondary" onclick="navigate('documents')">← <span data-i18n="btnBack">Back to documents</span></button>
+              <button type="button" id="btnProceedReview" class="btn btn-primary" disabled onclick="saveFormAndProceed()"><span data-i18n="btnProceed">Proceed to Summary</span> →</button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- 5. REVIEW SCREEN -->
+      <section id="screen-review" class="screen-view">
+        <div id="reviewPending">
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <h2 class="card-title">📋 <span data-i18n="revTitle">Review Application Summary</span></h2>
+                <p class="card-desc" data-i18n="revDesc">Please review all fields carefully. Once submitted, your application cannot be edited.</p>
+              </div>
+            </div>
+
+            <div class="summary-box">
+              <div class="summary-section">
+                <div class="section-head"><strong>👤 Personal Details</strong><button type="button" class="btn btn-secondary btn-xs" onclick="navigate('autofill')">Edit ✏️</button></div>
+                <div class="summary-grid">
+                  <div><span class="lbl">Applicant Name:</span><span class="val" id="revName">-</span></div>
+                  <div><span class="lbl">Father / Husband:</span><span class="val" id="revRelation">-</span></div>
+                  <div><span class="lbl">Date of Birth:</span><span class="val" id="revDob">-</span></div>
+                  <div><span class="lbl">Gender:</span><span class="val" id="revGender">-</span></div>
+                  <div><span class="lbl">Aadhaar (Last 4):</span><span class="val font-mono" id="revAadhaar">-</span></div>
+                  <div><span class="lbl">Mobile:</span><span class="val" id="revMobile">-</span></div>
+                </div>
+              </div>
+
+              <div class="summary-section">
+                <div class="section-head"><strong>🏠 Residential Address</strong><button type="button" class="btn btn-secondary btn-xs" onclick="navigate('autofill')">Edit ✏️</button></div>
+                <div class="summary-grid">
+                  <div class="full-width"><span class="lbl">Address:</span><span class="val" id="revAddress">-</span></div>
+                  <div><span class="lbl">District:</span><span class="val" id="revDistrict">-</span></div>
+                  <div><span class="lbl">State & PIN:</span><span class="val" id="revStatePin">-</span></div>
+                </div>
+              </div>
+
+              <div class="summary-section">
+                <div class="section-head"><strong>💰 Financial & Family Details</strong><button type="button" class="btn btn-secondary btn-xs" onclick="navigate('autofill')">Edit ✏️</button></div>
+                <div class="summary-grid">
+                  <div><span class="lbl">Occupation:</span><span class="val" id="revOccupation">-</span></div>
+                  <div><span class="lbl">Annual Income:</span><span class="val green font-bold" id="revIncome">-</span></div>
+                  <div><span class="lbl">Income Source:</span><span class="val" id="revSource">-</span></div>
+                  <div><span class="lbl">Family Members:</span><span class="val" id="revMembers">4</span></div>
+                  <div><span class="lbl">Ration Card:</span><span class="val" id="revRation">RC-MH-2024-89712</span></div>
+                  <div><span class="lbl">Purpose:</span><span class="val" id="revPurpose">Scholarship</span></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="text-right mt-20">
+              <button type="button" class="btn btn-primary" onclick="openSubmitModal()">🚀 <span data-i18n="btnSubmit">Submit Application</span></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Post Submit Card -->
+        <div id="reviewSuccess" class="card text-center" style="display:none;">
+          <div class="success-icon">✓</div>
+          <h2 class="card-title text-center">Application Submitted Successfully!</h2>
+          <p class="muted">Your application has been registered with the Revenue Department under statutory time-bound delivery.</p>
+          <div class="id-badge">
+            <small class="muted">Official Application ID</small>
+            <div id="postAppId" class="font-mono app-id-text">IC-2026-XXXXXX</div>
+            <small id="postDate" class="muted">Submitted on: Today</small>
+          </div>
+          <div><button type="button" class="btn btn-primary" onclick="navigate('track')">🔍 <span data-i18n="btnTrack">Track my application (Day 1 of 14)</span> →</button></div>
+        </div>
+      </section>
+
+      <!-- 6. TRACKING SCREEN -->
+      <section id="screen-track" class="screen-view">
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <h2 class="card-title">⏱️ <span data-i18n="trackHead">14-Day Application Tracking</span></h2>
+              <p class="card-desc" data-i18n="trackDesc">Live monitoring of statutory verification stages under the Right to Public Services Act.</p>
+            </div>
+            <button type="button" class="btn btn-primary btn-sm" onclick="skipToDay14()">⏩ <span data-i18n="btnSkip">Skip to Day 14 (Instant Complete)</span></button>
+          </div>
+
+          <div class="track-header-bar">
+            <div>
+              <span class="day-badge" id="trackDayBadge">Day 1 of 14</span>
+              <strong id="trackStageHeading" class="ml-10">Application received</strong>
+              <small class="block muted">Auto-advances 1 day every 4 seconds in demo mode</small>
+            </div>
+            <div class="text-right font-mono" id="trackAppId">IC-2026-XXXXXX</div>
+            <div class="progress-track full-width mt-10"><div class="progress-bar" id="trackBar" style="width:7%;"></div></div>
+          </div>
+
+          <div class="timeline" id="timelineContainer"></div>
+
+          <div id="certReadyBox" class="ready-banner" style="display:none;">
+            <div style="font-size:36px;">🎉</div>
+            <h3 data-i18n="certReadyTitle">Your Income Certificate has been successfully generated.</h3>
+            <p>Verification completed and digitally signed by Tehsildar, Nagpur.</p>
+            <button type="button" class="btn btn-white mt-10" onclick="navigate('certificate')">📜 <span data-i18n="btnViewCert">View & Download Certificate</span> →</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 7. CERTIFICATE SCREEN -->
+      <section id="screen-certificate" class="screen-view">
+        <div class="cert-toolbar">
+          <div>
+            <strong class="green" data-i18n="certReadyTitle">✓ Your Income Certificate has been successfully generated</strong>
+            <small class="block muted">Official Revenue Department Document • Digitally Verified</small>
+          </div>
+          <div class="flex-center gap-10">
+            <button type="button" class="btn btn-primary btn-sm" onclick="printCert()">🖨️ <span data-i18n="btnPrint">Download / Print Certificate</span></button>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="copyId()">📋 <span data-i18n="btnCopy">Copy Application ID</span></button>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="openResetModal()">🔄 <span data-i18n="btnAnother">Apply for another service</span></button>
+          </div>
+        </div>
+
+        <!-- Certificate Document Paper -->
+        <div class="certificate-paper" id="printCertArea">
+          <div class="watermark-text" aria-hidden="true">DEMO - NOT A REAL DOCUMENT</div>
+          <div class="cert-head">
+            <div class="cert-emblem">🏛️</div>
+            <h1>GOVERNMENT OF MAHARASHTRA</h1>
+            <h2>REVENUE & FOREST DEPARTMENT • OFFICE OF THE TEHSILDAR, NAGPUR</h2>
+            <div class="cert-ribbon">INCOME CERTIFICATE (उत्पन्नाचे प्रमाणपत्र)</div>
+          </div>
+
+          <div class="cert-meta">
+            <div>Certificate No: <strong id="cNum" class="font-mono">IC-2026-XXXXXX</strong></div>
+            <div>Issue Date: <strong id="cDate">Today</strong></div>
+            <div>Validity: <strong>1 Year</strong></div>
+          </div>
+
+          <p class="cert-body">
+            This is to certify that Shri/Smt <strong id="cName">Savitri Deshmukh</strong>,
+            Wife/Ward of Shri <strong id="cRelation">Ramesh Deshmukh</strong>,
+            resident of <strong id="cAddress">Plot 42, Anand Nagar, Wardha Road, Nagpur, Maharashtra - 440015</strong>,
+            has an annual family income of <strong id="cIncomeNum">Rs. 85,000</strong>
+            (<strong id="cIncomeWords">Rupees Eighty-Five Thousand Only</strong>)
+            from <strong id="cSource">Agriculture & Small Dairy</strong>
+            as per the official declaration and field inquiry conducted under the Maharashtra Right to Public Services Act.
+          </p>
+
+          <p class="cert-body">Purpose of Certificate: <strong id="cPurpose">Scholarship</strong>.</p>
+
+          <table class="cert-table">
+            <thead>
+              <tr><th>Sr.</th><th>Beneficiary</th><th>Relationship</th><th>Occupation</th><th>Annual Income</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>1</td><td id="ctName">Savitri Deshmukh</td><td>Self / Applicant</td><td id="ctOcc">Agriculture & Dairy</td><td id="ctIncome">₹85,000</td></tr>
+            </tbody>
+          </table>
+
+          <div class="cert-foot">
+            <div class="qr-col">
+              <svg class="qr-svg" viewBox="0 0 100 100">
+                <rect width="100" height="100" fill="#ffffff"/>
+                <rect x="5" y="5" width="26" height="26" fill="#000"/><rect x="9" y="9" width="18" height="18" fill="#fff"/><rect x="13" y="13" width="10" height="10" fill="#000"/>
+                <rect x="69" y="5" width="26" height="26" fill="#000"/><rect x="73" y="9" width="18" height="18" fill="#fff"/><rect x="77" y="13" width="10" height="10" fill="#000"/>
+                <rect x="5" y="69" width="26" height="26" fill="#000"/><rect x="9" y="73" width="18" height="18" fill="#fff"/><rect x="13" y="77" width="10" height="10" fill="#000"/>
+                <rect x="36" y="8" width="8" height="8" fill="#000"/><rect x="48" y="14" width="12" height="6" fill="#000"/><rect x="36" y="24" width="6" height="16" fill="#000"/><rect x="46" y="32" width="14" height="6" fill="#000"/><rect x="12" y="38" width="14" height="8" fill="#000"/><rect x="64" y="38" width="10" height="10" fill="#000"/><rect x="38" y="46" width="18" height="18" fill="#000"/><rect x="42" y="50" width="10" height="10" fill="#fff"/><rect x="38" y="72" width="10" height="12" fill="#000"/><rect x="52" y="68" width="12" height="18" fill="#000"/>
+              </svg>
+              <small class="block muted">Scan to Verify Online</small>
+            </div>
+            <div class="cert-legal muted">
+              This certificate is electronically generated. Under the IT Act 2000, physical signature is not required.
+            </div>
+            <div class="sign-box">
+              <div class="seal">🛡️✓</div>
+              <strong>DIGITALLY SIGNED</strong>
+              <div>Executive Magistrate & Tehsildar</div>
+              <div class="muted">Nagpur, Maharashtra</div>
+              <small id="cSignDate" class="muted">Verified Official</small>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 8. DASHBOARD SCREEN -->
+      <section id="screen-dashboard" class="screen-view">
+        <div class="hero-box">
+          <h1 id="dashWelcome">Welcome to <span>Sarthi</span></h1>
+          <p data-i18n="dashDesc">Your single window portal for Maharashtra time-bound public services and income certification.</p>
+          <button type="button" class="btn btn-primary mt-10" onclick="continueWhereLeftOff()">🚀 <span data-i18n="btnContinue">Continue where I left off</span> →</button>
+        </div>
+        <div class="stats-row">
+          <div class="card stat-card"><div class="stat-icon">📋</div><div><small class="muted">Active Applications</small><strong id="statActive">0</strong></div></div>
+          <div class="card stat-card"><div class="stat-icon">⏱️</div><div><small class="muted">Current Stage</small><strong id="statStage">Search Service</strong></div></div>
+          <div class="card stat-card"><div class="stat-icon">📁</div><div><small class="muted">Documents Added</small><strong id="statDocs">0 of 4</strong></div></div>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <div><h2 class="card-title">📜 Sarthi Activity Log</h2><p class="card-desc">Timestamped audit trail of all actions performed.</p></div>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="downloadLog()">⬇️ Download log (.txt)</button>
+          </div>
+          <div id="activityLogBox" class="log-list"></div>
+        </div>
+      </section>
+
+      <!-- 9. HELP SCREEN -->
+      <section id="screen-help" class="screen-view">
+        <div class="card">
+          <div class="card-head"><h2 class="card-title">ℹ️ Help & Citizen Support</h2></div>
+          <div class="helpline-box">📞 Toll Free Helpline: <strong>1800-22-1234</strong> / <strong>1800-11-2026</strong> (8:00 AM to 8:00 PM)</div>
+          <div class="faq-list">
+            <div class="faq-item open"><div class="faq-q" onclick="toggleFaq(this)">What is the statutory timeline for an Income Certificate? <span>▼</span></div><div class="faq-a">Under the RTS Act, an Income Certificate must be issued within <strong>14 working days</strong> after scrutiny by the Talathi and Tehsildar.</div></div>
+            <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Which documents are required? <span>▼</span></div><div class="faq-a">Aadhaar Card, Ration Card, Address Proof (electricity bill/tax receipt), and Income Self-Declaration.</div></div>
+            <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">How does Sarthi auto-fill work? <span>▼</span></div><div class="faq-a">Sarthi extracts your verified identity, address, and income details from the 4 uploaded documents and fills Form 1-A in 3 seconds.</div></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="portal-footer">
+      <p data-i18n="footerNote">Demo with fake data. Sarthi never stores real documents.</p>
+      <small>© 2026 Sarthi Portal • Government of Maharashtra Public Services Demo</small>
+    </footer>
+  </div>
+</div>
+
+<!-- FLOATING ASSISTANT -->
+<button class="assistant-pill" onclick="toggleAssistant()">💡 <span id="astBtn">Sarthi Assistant</span></button>
+<div class="assistant-panel" id="assistantPanel">
+  <div class="assistant-head"><strong>💡 <span id="astTitle">Sarthi Assistant</span></strong><button onclick="toggleAssistant()">×</button></div>
+  <div class="assistant-body" id="assistantBody">Welcome to Sarthi! Login with your mobile number to get started.</div>
+</div>
+
+<!-- MODALS -->
+<div class="modal-bg" id="modalSubmit">
+  <div class="modal-card">
+    <div style="font-size:32px;">⚠️</div>
+    <h3>Submit Application?</h3>
+    <p class="muted">Submit now? You cannot edit after this. An official Application ID will be generated and your 14-day statutory timeline will begin.</p>
+    <div class="modal-btns">
+      <button type="button" class="btn btn-secondary" onclick="closeSubmitModal()">Cancel</button>
+      <button type="button" class="btn btn-primary" onclick="confirmSubmission()">Yes, submit</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modalLogout">
+  <div class="modal-card">
+    <div style="font-size:32px;">↪</div>
+    <h3>Logout from Sarthi?</h3>
+    <p class="muted">Are you sure you want to log out? Your session progress will be cleared.</p>
+    <div class="modal-btns">
+      <button type="button" class="btn btn-secondary" onclick="closeLogoutModal()">Cancel</button>
+      <button type="button" class="btn btn-danger" onclick="confirmLogout()">Yes, Logout</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modalReset">
+  <div class="modal-card">
+    <div style="font-size:32px;">🔄</div>
+    <h3>Apply for Another Service?</h3>
+    <p class="muted">This will reset your current Income Certificate demonstration and return to the service catalog.</p>
+    <div class="modal-btns">
+      <button type="button" class="btn btn-secondary" onclick="closeResetModal()">Cancel</button>
+      <button type="button" class="btn btn-primary" onclick="confirmReset()">Yes, Proceed</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-box" id="toastBox"></div>
+<script src="app.js"></script>
+</body>
+</html>
